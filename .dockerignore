@@ -1,0 +1,21 @@
+# Ignore all files by default
+*
+
+# Include only files required to build image
+!app
+!bin
+!config
+!db
+!lib
+!storage
+!vendor
+
+!/log/.keep
+!/tmp/.keep
+!/tmp/pids/
+!/tmp/pids/.keep
+
+!.ruby-version
+!Gemfile*
+!Rakefile
+!config.ru

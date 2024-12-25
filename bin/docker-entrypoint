@@ -1,0 +1,15 @@
+#!/bin/bash -e
+
+# If running the rails server then create or migrate existing database
+if [ "${*}" == "./bin/thrust ./bin/rails server" ]; then
+  echo "Preparing database"
+  ./bin/rails db:prepare
+fi
+
+# If server's pid file exists delete it
+if [ -f tmp/pids/server.pid ]; then
+  echo "Deleting stale server's pid file"
+  rm tmp/pids/server.pid
+fi
+
+exec "${@}"
