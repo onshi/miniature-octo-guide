@@ -1,21 +1,43 @@
 class BravadoRecommendationClient
   ApiError = Class.new(StandardError)
-  NotFoundError = Class.new(ApiError)
   UnavailableError = Class.new(ApiError) # TODO: maybe TimeoutError?
 
   API_BASE_URL = "https://bravado-images-production.s3.amazonaws.com/recomended_cars.json".freeze
+  CLIENT_OPTIONS = {
+    request: {
+      open_timeout: 5,
+      timeout: 5
+    },
+    url: API_BASE_URL,
+    headers: {
+      "Content-Type" => "application/json"
+    }
+  }.freeze
 
-  def initialize
-  end
+  class << self
+    def get_cars(user_id)
+      client.get(API_BASE_URL, {user_id: user_id}).body
+    rescue Faraday::ParsingError => e
+      raise ApiError.new(e)
+    rescue Faraday::ConnectionFailed, Faraday::RequestTimeoutError => e
+      raise UnavailableError.new(e)
+    end
 
-  def self.get_cars
-  end
+    private
 
-  private
+    def client
+      @client ||= Faraday.new do |builder|
+        builder.use(
+          :http_cache,
+          store: Rails.cache,
+          logger: Rails.logger,
+          strategy: Faraday::HttpCache::Strategies::ByVary
+        )
 
-  def get_cars
-  end
+        builder.adapter Faraday.default_adapter
 
-  def connection
+        builder.response :json
+      end
+    end
   end
 end
